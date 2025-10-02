@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy import create_engine, Column, Integer, String, func
 from sqlalchemy.orm import declarative_base, sessionmaker
 import bcrypt
 
@@ -6,7 +6,7 @@ DATABASE_URL = "sqlite:///DobroLetovo.db"
 engine = create_engine(DATABASE_URL, echo=True)
 Base = declarative_base()
 
-class Volunteers(Base):
+class Volunteer(Base):
     __tablename__ = 'Volunteers'
     Volunteer_ID = Column(Integer, primary_key=True)
     Volunteer_Name = Column(String(50), nullable=False)
@@ -19,7 +19,7 @@ class Volunteers(Base):
         return f"<Volunteer(ID={self.Volunteer_ID}, name={self.Volunteer_Name}, Hours={self.Volunteer_Hours})>"
 
 
-class Organisations(Base):
+class Organisation(Base):
     __tablename__ = 'Organisations'
     Organisation_ID = Column(Integer, primary_key=True)
     Organisation_Name = Column(String(50), nullable=False)
@@ -64,7 +64,7 @@ class Organzation_Autentification(Base):
         return bcrypt.checkpw(password.encode('utf-8'), self.Organization_Password_Hash.encode('utf-8'))
 
 
-class Comments(Base):
+class Comment(Base):
     __tablename__ = 'Comments'
     Comment_ID = Column(Integer, primary_key = True)
     Volunteer_ID = Column(Integer, nullable = False)
@@ -76,7 +76,7 @@ class Comments(Base):
     def __repr__(self):
         return f"<Comment(ID={self.Comment_ID}, Volunteer={self.Volunteer_ID}, Organisation={self.Organisation_ID}, Text={self.Comment_Text})>"
 
-class Events(Base):
+class Event(Base):
     __tablename__ = 'Events'
     Event_ID = Column(Integer, primary_key=True)
     Organisation_ID = Column(Integer, nullable=False)
@@ -88,7 +88,7 @@ class Events(Base):
     def __repr__(self):
         return f"<Event(ID={self.Event_ID}, Name={self.Event_Name}, Organisation={self.Organisation_ID_ID}, Required Volunteers={self.Required_Volunteers})>"
 
-class Requests(Base):
+class Request(Base):
     __tablename__ = 'Requests'
     Request_ID = Column(Integer, primary_key=True)
     Volunteer_ID = Column(Integer, nullable=False)
@@ -100,17 +100,29 @@ class Requests(Base):
         return f"<Request(ID={self.Request_ID}, Volunteer={self.Volunteer_ID}, Event={self.Event_ID}, Status={self.Request_Status})>"
 
 def register_volunteer(username: str, password: str, name: str, description: str):
-    if session.query(Volunteer_Autentification).filter_by(username=username).first():
+    if session.query(Volunteer_Autentification).filter_by(Volunteer_Username=username).first():
         print("Username already exists.")
         return "Username already exists"
 
-    last_id = session.query(Volunteer_Autentification).filter_by(Volunteer_ID).first()
-    user = Volunteer_Autentification(Volunteer_ID = last_id + 1, username=username)
-    user.set_password(password)
-    session.add(user)
+    # Get max ID
+    last_id = session.query(func.max(Volunteer.Volunteer_ID)).scalar()
+    new_id = (last_id or 0) + 1  # If no volunteers yet, start from 1
 
-    user = Volunteer(Volunteer_ID = last_id + 1, Volunteer_Name = name, Volunteer_Description = description, Volunteer_Rating = 100, Volunteer_Hours = 0)
-    session.add(user)
+    # Create authentification entry
+    user_auth = Volunteer_Autentification(Volunteer_ID=new_id, Volunteer_Username=username)
+    user_auth.set_password(password)
+    session.add(user_auth)
+
+    # Create Volunteer profile
+    user_profile = Volunteer(
+        Volunteer_ID=new_id,
+        Volunteer_Name=name,
+        Volunteer_Description=description,
+        Volunteer_Rating=100,
+        Volunteer_Hours=0
+    )
+    session.add(user_profile)
+
     session.commit()
     print(f"User '{username}' registered successfully.")
 
@@ -118,20 +130,31 @@ def register_organization(username: str, password: str, name: str, description: 
     if session.query(Organzation_Autentification).filter_by(username=username).first():
         print("Username already exists.")
         return "Username already exists"
-    last_id = session.query(Organzation_Autentification_Autentification).filter_by(Organization_ID).first()
-    user = Organzation_Autentification_Autentification(Organization_ID = last_id + 1, username=username)
-    user.set_password(password)
-    session.add(user)
 
-    user = Volunteer(Organization_ID = last_id + 1, Organization_Name = name, Organization_Description = description)
-    session.add(user)
+    #Get max ID
+    last_id = session.query(func.max(Organisation.Organization_ID)).scalar()
+    new_id = (last_id or 0) + 1  # If no volunteers yet, start from 1
+
+    #Create authentification entry
+    user_auth = Organzation_Autentification(Organization_ID = new_id, username=username)
+    user_auth.set_password(password)
+    session.add(user_auth)
+
+    #Create Volunteerprofile
+    user_profile = Volunteer(
+        Organization_ID = new_id,
+        Organization_Name = name,
+        Organization_Description = description
+    )
+    session.add(user_profile)
+
     session.commit()
     print(f"User '{username}' registered successfully.")
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
 
-new_volunteer = Volunteers(
+new_volunteer = Volunteer(
     Volunteer_ID=4,
     Volunteer_Name="Petr",
     Volunteer_Rating=90,
@@ -141,6 +164,6 @@ new_volunteer = Volunteers(
 #session.add(new_volunteer)
 session.commit()
 
-volunteer = session.query(Volunteers).filter_by(Volunteer_Hours = 404).all()
+volunteer = session.query(Volunteer).filter_by(Volunteer_Hours = 404).all()
 print(volunteer)
 
