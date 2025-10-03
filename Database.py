@@ -30,8 +30,9 @@ class Organisation(Base):
         return f"<Organisation(ID={self.Organisation_ID_ID}, name={self.Organisation_Name_Name}, Description={self.Organisation_Description})>"
 class Volunteer_Autentification(Base):
     __tablename__ = 'Volunteer_Autentification'
-    Volunteer_ID = Column(Integer, primary_key=True)
+    Volunteer_ID = Column(Integer,  primary_key=True)
     Volunteer_Username = Column(String(128), nullable=False)
+    Volunteer_Email = Column(String(128), nullable=False)
     Volunteer_Password_Hash = Column(String(128), nullable=False)
     # Organisation_Description contains not the description itself, but the path to the file containing it
     Organisation_Description = Column(String(20))
@@ -48,8 +49,9 @@ class Volunteer_Autentification(Base):
 class Organzation_Autentification(Base):
     extend_existing = True
     __tablename__ = 'Organization_Autentification'
-    Organization_ID = Column(Integer, primary_key=True)
+    Organization_ID = Column(Integer, primary_key=True, foreign_key=True)
     Organization_Username = Column(String(128), nullable=False)
+    Organization_Email = Column(String(128), nullable=False)
     Organization_Password_Hash = Column(String(128), nullable=False)
     # Organisation_Description contains not the description itself, but the path to the file containing it
     Organisation_Description = Column(String(20))
@@ -67,8 +69,8 @@ class Organzation_Autentification(Base):
 class Comment(Base):
     __tablename__ = 'Comments'
     Comment_ID = Column(Integer, primary_key = True)
-    Volunteer_ID = Column(Integer, nullable = False)
-    Organisation_ID = Column(Integer, nullable = False)
+    Volunteer_ID = Column(Integer, nullable = False, foreign_key=True)
+    Organisation_ID = Column(Integer, nullable = False, foreign_key=True)
     Comment_Date = Column(String(10))
     Comment_Text = Column(String(1000))
     Comment_Direction = Column(String(2))
@@ -79,7 +81,7 @@ class Comment(Base):
 class Event(Base):
     __tablename__ = 'Events'
     Event_ID = Column(Integer, primary_key=True)
-    Organisation_ID = Column(Integer, nullable=False)
+    Organisation_ID = Column(Integer, nullable=False, foreign_key=True)
     Required_Volunteers = Column(Integer)
     Event_Date = Column(String(10))
     Event_Description = Column(String(20))
@@ -91,8 +93,8 @@ class Event(Base):
 class Request(Base):
     __tablename__ = 'Requests'
     Request_ID = Column(Integer, primary_key=True)
-    Volunteer_ID = Column(Integer, nullable=False)
-    Event_ID = Column(Integer, nullable=False)
+    Volunteer_ID = Column(Integer, nullable=False, foreign_key=True)
+    Event_ID = Column(Integer, nullable=False, foreign_key=True)
     Request_Status = Column(String(10))
     Request_Content = Column(String(20))
 
