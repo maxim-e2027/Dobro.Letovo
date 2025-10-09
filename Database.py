@@ -34,8 +34,8 @@ class Volunteer_Autentification(Base):
     Volunteer_Username = Column(String(128), nullable=False)
     Volunteer_Email = Column(String(128), nullable=False)
     Volunteer_Password_Hash = Column(String(128), nullable=False)
-    # Organisation_Description contains not the description itself, but the path to the file containing it
-    Organisation_Description = Column(String(20))
+    #Volunteer_Description contains not the description itself, but the path to the file containing it
+    Volunteer_Description = Column(String(20))
 
     def __repr__(self):
         return f"<Volunteer(ID={self.Organisation_ID_ID})>"
