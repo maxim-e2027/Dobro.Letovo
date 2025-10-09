@@ -29,13 +29,13 @@ class Organisation(Base):
     def __repr__(self):
         return f"<Organisation(ID={self.Organisation_ID_ID}, name={self.Organisation_Name_Name}, Description={self.Organisation_Description})>"
 class Volunteer_Autentification(Base):
-    __tablename__ = 'Volunteer_Autentification'
+    tablename = 'Volunteer_Autentification'
     Volunteer_ID = Column(Integer,  primary_key=True)
     Volunteer_Username = Column(String(128), nullable=False)
     Volunteer_Email = Column(String(128), nullable=False)
     Volunteer_Password_Hash = Column(String(128), nullable=False)
-    # Organisation_Description contains not the description itself, but the path to the file containing it
-    Organisation_Description = Column(String(20))
+    #Volunteer_Description contains not the description itself, but the path to the file containing it
+    Volunteer_Description = Column(String(20))
 
     def __repr__(self):
         return f"<Volunteer(ID={self.Organisation_ID_ID})>"
