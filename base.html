@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dobro.Letovo{% endblock %}</title>
+
+    <!-- Подключаем стили -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Шапка сайта -->
+    <header>
+        <nav>
+            <div class="logo">
+                <a href="{{ url_for('index') }}">Dobro.Letovo</a>
+            </div>
+            <ul class="menu">
+                <li><a href="{{ url_for('index') }}">Главная</a></li>
+                <li><a href="{{ url_for('events') }}">Каталог мероприятий</a></li>
+                <li><a href="{{ url_for('profile') }}">Профиль</a></li>
+                <li><a href="{{ url_for('create_event') }}">Создать событие</a></li>
+                <li><a href="{{ url_for('login') }}">Вход</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Основной контент -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Подвал сайта -->
+    <footer>
+        <p>&copy; 2025 Dobro.Letovo. Все права защищены.</p>
+    </footer>
+</body>
+</html>

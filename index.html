@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Главная — Dobro.Letovo{% endblock %}
+
+{% block content %}
+    <section class="card">
+        <h1>Добро пожаловать в Dobro.Letovo</h1>
+        <p>
+            Платформа для школьников и организаций, которая упрощает учёт
+            волонтёрской активности и делает её официально подтверждаемой.
+        </p>
+        <a href="{{ url_for('events') }}" class="btn btn-primary">Перейти к мероприятиям</a>
+    </section>
+
+    <section class="card">
+        <h2>Что вы можете сделать?</h2>
+        <ul>
+            <li><strong>Волонтёры:</strong> регистрируйтесь на события, подтверждайте участие и копите часы.</li>
+            <li><strong>Организации:</strong> создавайте мероприятия и быстро находите помощников.</li>
+            <li><strong>Администрация:</strong> отслеживайте активность и подтверждайте достижения.</li>
+        </ul>
+    </section>
+
+    <section class="card">
+        <h2>Ближайшие шаги</h2>
+        <p>Здесь будет отображаться список актуальных событий и новостей.</p>
+        <a href="{{ url_for('events') }}" class="btn btn-primary">Смотреть все события</a>
+    </section>
+{% endblock %}

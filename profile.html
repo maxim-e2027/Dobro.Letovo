@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Профиль — Dobro.Letovo{% endblock %}
+
+{% block content %}
+    <section class="card">
+        <h1>Профиль пользователя</h1>
+        <p><strong>Имя:</strong> Иван Иванов</p>
+        <p><strong>Роль:</strong> Волонтёр</p>
+        <p><strong>Всего часов:</strong> 42</p>
+        <p><strong>Рейтинг:</strong> ★★★★☆</p>
+        <a href="{{ url_for('events') }}" class="btn btn-primary">Найти новые события</a>
+    </section>
+
+    <section class="card">
+        <h2>Мои мероприятия</h2>
+        <ul>
+            <li>
+                <strong>Помощь на школьной ярмарке</strong> — 20 сентября 2025 (подтверждено)
+            </li>
+            <li>
+                <strong>Эко-субботник в парке</strong> — 25 сентября 2025 (ожидает подтверждения)
+            </li>
+            <li>
+                <strong>Помощь в библиотеке</strong> — 28 сентября 2025 (записан)
+            </li>
+        </ul>
+    </section>
+
+    <section class="card">
+        <h2>Настройки</h2>
+        <p><a href="#">Редактировать профиль</a></p>
+        <p><a href="#">Выйти</a></p>
+    </section>
+{% endblock %}
