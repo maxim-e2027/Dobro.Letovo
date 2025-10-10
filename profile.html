@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Профиль — Dobro.Letovo{% endblock %}
+
+{% block content %}
+<section class="profile-card">
+    <!-- Фото -->
+    <div class="profile-avatar">
+        {% if user.avatar %}
+            <img src="{{ user.avatar }}" alt="{{ user.name }}">
+        {% else %}
+            <div class="avatar-placeholder">{{ user.name[0] }}</div>
+        {% endif %}
+    </div>
+
+    <!-- Данные -->
+    <div class="profile-info">
+        <h2>{{ user.name }}</h2>
+        <p class="meta">Класс: {{ user.class }}</p>
+        <p class="meta">Email: {{ user.email }}</p>
+        <p>{{ user.bio }}</p>
+
+        <div class="actions">
+            <a href="{{ url_for('edit_profile', user_id=user.id) }}" class="btn-primary">Редактировать</a>
+            <a href="#" class="btn-outline">Настройки</a>
+        </div>
+    </div>
+</section>
+
+<!-- Блок активности -->
+<section class="activity">
+    <h3>Мои активности</h3>
+    <div class="cards">
+        <div class="card">
+            <h4>Участие в олимпиаде</h4>
+            <p>Февраль 2025</p>
+        </div>
+        <div class="card">
+            <h4>Волонтёрство</h4>
+            <p>30 часов помощи</p>
+        </div>
+        <div class="card">
+            <h4>Участие в проекте</h4>
+            <p>Dobro.Letovo</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Редактировать профиль{% endblock %}
+
+{% block content %}
+<section class="profile-edit">
+    <h2>Редактировать профиль</h2>
+
+    <form method="post" enctype="multipart/form-data" class="form">
+        <label>Имя:</label>
+        <input type="text" name="name" value="{{ user.name }}" required>
+
+        <label>Email:</label>
+        <input type="email" name="email" value="{{ user.email }}" required>
+
+        <label>Описание:</label>
+        <textarea name="bio" rows="4">{{ user.bio }}</textarea>
+
+        <label>Аватар:</label>
+        {% if user.avatar %}
+            <img src="{{ url_for('static', filename=user.avatar.split('static/')[1]) }}" alt="avatar" class="avatar-preview">
+        {% endif %}
+        <input type="file" name="avatar">
+
+        <button type="submit" class="btn-primary">Сохранить</button>
+        <a href="{{ url_for('profile', user_id=user.id) }}" class="btn-outline">Отмена</a>
+    </form>
+</section>
+{% endblock %}

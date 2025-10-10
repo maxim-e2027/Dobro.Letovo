@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Каталог мероприятий{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h2>Каталог мероприятий</h2>
+</section>
+
+<!-- Фильтры -->
+<form method="get" class="filters">
+    <input type="text" name="search" placeholder="Поиск событий..."
+           value="{{ request.args.get('search','') }}">
+    <select name="category">
+        <option value="all">Все категории</option>
+        {% for c in categories %}
+            <option value="{{ c }}" {% if request.args.get('category') == c %}selected{% endif %}>{{ c }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Применить</button>
+</form>
+
+<!-- События -->
+<div class="cards">
+    {% for event in events %}
+    <div class="card">
+        <div class="card-header">
+            <h3>{{ event.title }}</h3>
+        </div>
+        <div class="card-body">
+            {% if event.date %}
+                <p class="meta">📅 {{ event.date.strftime("%d.%m.%Y") }}</p>
+            {% endif %}
+            <p class="meta">🏷 {{ event.category }}</p>
+            <p>{{ event.description }}</p>
+        </div>
+        <div class="card-actions">
+            <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn-primary">Подробнее</a>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty">События не найдены</div>
+    {% endfor %}
+</div>
+{% endblock %}

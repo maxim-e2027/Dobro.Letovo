@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Вход — Dobro.Letovo{% endblock %}
+
+{% block content %}
+    <section class="card">
+        <h1>Вход в систему</h1>
+        <form method="post" action="/login">
+            <label for="email">Электронная почта:</label>
+            <input type="email" id="email" name="email" placeholder="example@mail.com" required>
+
+            <label for="password">Пароль:</label>
+            <input type="password" id="password" name="password" placeholder="Введите пароль" required>
+
+            <button type="submit" class="btn btn-primary">Войти</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <h2>Нет аккаунта?</h2>
+        <p>Зарегистрируйтесь как:</p>
+        <ul>
+            <li><a href="#">Волонтёр</a></li>
+            <li><a href="#">Организация</a></li>
+        </ul>
+    </section>
+{% endblock %}

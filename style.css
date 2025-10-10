@@ -1,0 +1,213 @@
+/* ===== Глобальные переменные ===== */
+:root {
+  --blue: #1f3d7a;
+  --blue-dark: #12264d;
+  --yellow: #FAC314;
+  --bg: #f5f7fa;
+  --white: #fff;
+  --gray: #6b7480;
+  --border: #e5e8ed;
+  --radius: 12px;
+  --shadow: 0 4px 12px rgba(0,0,0,0.05);
+  --font: "Inter", "Segoe UI", Roboto, sans-serif;
+}
+
+/* ===== Базовые стили ===== */
+body {
+  margin: 0;
+  background: var(--bg);
+  font-family: var(--font);
+  color: #222;
+}
+
+a { text-decoration: none; color: var(--blue-dark); }
+h1, h2, h3 { margin: 0; }
+
+/* ===== Макет ===== */
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ===== Сайдбар ===== */
+.sidebar {
+  width: 240px;
+  background: var(--white);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.sidebar .logo img { max-width: 160px; }
+.sidebar .menu { display: flex; flex-direction: column; gap: 12px; }
+.sidebar .menu a {
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  font-weight: 500;
+}
+.sidebar .menu a:hover {
+  background: var(--bg);
+}
+
+/* ===== Контент ===== */
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Верхняя панель */
+.topbar {
+  background: var(--white);
+  box-shadow: var(--shadow);
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.topbar .site-title { font-size: 18px; font-weight: 600; color: var(--blue-dark); }
+.topbar .profile { display: flex; gap: 12px; align-items: center; }
+
+/* ===== Основная страница ===== */
+.page { padding: 24px; }
+.page-header h2 { font-size: 24px; margin-bottom: 16px; }
+
+/* ===== Фильтры ===== */
+.filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.filters input, .filters select {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--white);
+}
+.filters button {
+  padding: 10px 18px;
+  border-radius: var(--radius);
+  border: none;
+  background: var(--blue);
+  color: var(--white);
+  font-weight: 600;
+  cursor: pointer;
+}
+.filters button:hover { background: var(--blue-dark); }
+
+/* ===== Карточки ===== */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px,1fr));
+  gap: 20px;
+}
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.card-header h3 { font-size: 18px; color: var(--blue-dark); }
+.card .meta { font-size: 14px; color: var(--gray); }
+.card-actions { margin-top: auto; }
+.btn-primary {
+  display: inline-block;
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  background: var(--blue);
+  color: var(--white);
+  font-weight: 600;
+}
+.btn-primary:hover { background: var(--blue-dark); }
+
+/* ===== Пустое состояние ===== */
+.empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px;
+  background: var(--white);
+  border-radius: var(--radius);
+  color: var(--gray);
+}
+
+/* ===== Профиль ===== */
+.profile-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+.profile-avatar img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.avatar-placeholder {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  font-weight: bold;
+}
+.profile-info h2 {
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+.profile-info .meta {
+  color: var(--gray);
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+.profile-info p {
+  margin: 8px 0;
+}
+.profile-info .actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 12px;
+}
+.btn-outline {
+  display: inline-block;
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--blue);
+  color: var(--blue-dark);
+  background: transparent;
+  font-weight: 600;
+}
+.btn-outline:hover {
+  background: var(--bg);
+}
+
+/* ===== Активность ===== */
+.activity h3 {
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+.activity .cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
+  gap: 16px;
+}
+.activity .card {
+  padding: 16px;
+}
+.activity .card h4 {
+  margin-bottom: 6px;
+  font-size: 16px;
+  color: var(--blue-dark);
+}

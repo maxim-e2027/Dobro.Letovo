@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Событие — Dobro.Letovo{% endblock %}
+
+{% block content %}
+    <section class="card">
+        <h1>{{ event.title }}</h1>
+        <p><strong>Организатор:</strong> {{ event.organisation.name if event.organisation else "Неизвестно" }}</p>
+
+        <h2>Описание</h2>
+        <p>{{ event.description }}</p>
+
+        <h2>Детали участия</h2>
+        <ul>
+            <li>Место проведения: {{ event.location }}</li>
+            <li>Количество мест: {{ event.capacity }}</li>
+            <li>Категория: {{ event.category }}</li>
+        </ul>
+
+        <!-- Форма регистрации на событие -->
+        <form action="{{ url_for('join_event', event_id=event.id) }}" method="post">
+            <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+        </form>
+    </section>
+
+    <!-- Комментарии -->
+    <section class="card">
+        <h2>Отзывы о мероприятии</h2>
+        {% if comments %}
+            {% for comment in comments %}
+                <div class="card">
+                    <p><strong>{{ comment.volunteer.name if comment.volunteer else "Аноним" }}:</strong> {{ comment.content }}</p>
+                    <small>{{ comment.created_at.strftime("%d.%m.%Y %H:%M") }}</small>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Пока нет отзывов. Станьте первым!</p>
+        {% endif %}
+    </section>
+
+    <!-- Форма добавления комментария -->
+    <section class="card">
+        <h3>Оставить отзыв</h3>
+        <form method="post" action="{{ url_for('event_comments', event_id=event.id) }}">
+            <input type="hidden" name="volunteer_id" value="1"> <!-- временно, пока нет авторизации -->
+            <label for="content">Ваш комментарий:</label>
+            <textarea id="content" name="content" rows="3" required></textarea>
+            <button type="submit" class="btn btn-primary">Отправить</button>
+        </form>
+    </section>
+{% endblock %}
