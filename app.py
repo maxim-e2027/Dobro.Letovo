@@ -4,6 +4,10 @@ import sqlite3
 from datetime import datetime
 
 app = Flask(__name__)
+global new_file
+new_file = 0
+global i_d
+i_d = 0
 
 #Команды работы с БД должны быть тут
 
@@ -86,6 +90,22 @@ def profile():
 @app.route("/create")
 def create_event():
     return render_template("create_event.html")
+
+
+@app.route("/create", methods=["POST"])
+def event_store():
+    name = Flask.request.form.get('title')
+    date = Flask.request.form.get('date')
+    location = Flask.request.form.get('location')
+    capacity = Flask.request.form.get('capacity')
+    desc = Flask.request.form.get('description')
+    f = open('e'+str(new_file), 'w')
+    ds = 'e'+str(new_file)
+    f.write(desc)
+    f.close
+    new_file += 1
+    create_event(capacity, date, ds, i_d, name)
+
 
 # === Авторизация ===
 @app.route("/login")
