@@ -1,18 +1,15 @@
 from flask import Flask, render_template, current_app, g
 import click
 import sqlite3
+import bcrypt
 from datetime import datetime
 
 app = Flask(__name__)
-global new_file
-new_file = 0
-global i_d
-i_d = 0
 
 #Команды работы с БД должны быть тут
 
 def get_db():
-    if 'db' not in g:
+    if 'DobroLetovo.db' not in g:
         g.db = sqlite3.connect(
             current_app.config['DATABASE'],
             detect_types=sqlite3.PARSE_DECLTYPES
@@ -28,18 +25,18 @@ def close_db(e=None):
         db.close()
 
 
-def get_v_password(login):
+def get_volunteer_password(login):
     db = get_db()
     db.executescript('SELECT * FROM Volunteer_Autentification'
                      'WHERE Volunteer_Username = "'+login + '";')
 
-def get_o_password(login):
+def get_organization_password(login):
     db = get_db()
     db.executescript(('SELECT * FROM Organization_Autentification'
                      'WHERE Organization_Username = "'+login + '";'))
 
 
-def create_event(req_ppl, date, desc, o_id, name):
+def create_event_database(req_ppl, date, desc, o_id, name):
     """
     Creates an event
     :param req_ppl: How many ppl u need
@@ -53,20 +50,78 @@ def create_event(req_ppl, date, desc, o_id, name):
                               'LIMIT 1 OFFSET 0')
     db.executescript('INSERT INTO Event'
                      'VALUES ('+str(e_id)+', '+o_id+', '+req_ppl+', '+date+', '+desc+', '+name+');')
+def register_volunteer(username: str, password: str, name: str, description: str):
+    if session.query(Volunteer_Autentification).filter_by(Volunteer_Username=username).first():
+        print("Username already exists.")
+        return "Username already exists"
 
+    # Get max ID
+    last_id = session.query(func.max(Volunteer.Volunteer_ID)).scalar()
+    new_id = (last_id or 0) + 1  # If no volunteers yet, start from 1
 
-def create_request(v_id, e_id, content):
+    # Create authentification entry
+    user_auth = Volunteer_Autentification(Volunteer_ID=new_id, Volunteer_Username=username)
+    user_auth.set_password(password)
+    session.add(user_auth)
+
+    # Create Volunteer profile
+    user_profile = Volunteer(
+        Volunteer_ID=new_id,
+        Volunteer_Name=name,
+        Volunteer_Description=description,
+        Volunteer_Rating=100,
+        Volunteer_Hours=0
+    )
+    session.add(user_profile)
+
+    session.commit()
+    print(f"User '{username}' registered successfully.")
+
+def register_organization(username: str, password: str, name: str, description: str):
+    if session.query(Organzation_Autentification).filter_by(username=username).first():
+        print("Username already exists.")
+        return "Username already exists"
+
+    #Get max ID
+    last_id = session.query(func.max(Organisation.Organization_ID)).scalar()
+    new_id = (last_id or 0) + 1  # If no volunteers yet, start from 1
+
+    #Create authentification entry
+    user_auth = Organzation_Autentification(Organization_ID = new_id, username=username)
+    user_auth.set_password(password)
+    session.add(user_auth)
+
+    #Create Volunteerprofile
+    user_profile = Volunteer(
+        Organization_ID = new_id,
+        Organization_Name = name,
+        Organization_Description = description
+    )
+    session.add(user_profile)
+
+    session.commit()
+    print(f"User '{username}' registered successfully.")
+
+def alter_request(request_id: int, new_status: str) -> None:
     db = get_db()
-    r_id = db.executescript('SELECT Request_ID FROM Request'
-                            'ORDER BY Request_ID DESC'
-                            'LIMIT 1 OFFSET 0')
-    db.executescript('INSERT INTO Event'
-                     'VALUES (' + str(r_id) + ', ' + v_id + ', ' + e_id + ', "AWAITING APPROVAL", ' + content + ');')
+    (db.executescript
+    (f'''UPDATE Request"
+    "    SET Request_ID = {request_id}
+             Request_Status = {new_status}'''))
 
+def check_login_volunteer(email: str, password: str) -> bool:
+    db = get_db()
+
+    password_correct = db.executescript(f''' SELECT Volunteer_Password_Hash FROM Volunteer_Autentification
+                                             WHERE Volunteer_Email = {email}''')
+    if vounteer_id == '':
+        return False
+    return bcrypt.checkpw(password.encode('utf-8'), password_correct.encode('utf-8'))
 
 # === Главная страница ===
 @app.route("/")
 def index():
+
     return render_template("index.html")
 
 # === Каталог мероприятий ===
@@ -91,27 +146,24 @@ def profile():
 def create_event():
     return render_template("create_event.html")
 
-
-@app.route("/create", methods=["POST"])
-def event_store():
-    name = Flask.request.form.get('title')
-    date = Flask.request.form.get('date')
-    location = Flask.request.form.get('location')
-    capacity = Flask.request.form.get('capacity')
-    desc = Flask.request.form.get('description')
-    f = open('e'+str(new_file), 'w')
-    ds = 'e'+str(new_file)
-    f.write(desc)
-    f.close
-    new_file += 1
-    create_event(capacity, date, ds, i_d, name)
-
-
 # === Авторизация ===
 @app.route("/login")
 def login():
+    db = get.db()
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+    if check_login_volunteer((email, password)):
+        print('Successful Login')
+    else:
+        print('Wrong email or password')
     return render_template("login.html")
 
 # === Запуск приложения ===
+    create_event_database(100, '03.23.2025', 'We need people to dig holes', 1, 'Hole-digging')
+    create_event_database(52, '04.20.2052', 'Sort rubbish', 2, 'Rubbish-Sorting')
+    create_event_database(148, '14.02.1049', 'Robbing Serfs', 1, 'Tax Collection')
+
+
 if __name__ == "__main__":
     app.run(debug=True)
