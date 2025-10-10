@@ -51,6 +51,14 @@ def create_event(req_ppl, date, desc, o_id, name):
                      'VALUES ('+str(e_id)+', '+o_id+', '+req_ppl+', '+date+', '+desc+', '+name+');')
 
 
+def create_request(v_id, e_id, content):
+    db = get_db()
+    r_id = db.executescript('SELECT Request_ID FROM Request'
+                            'ORDER BY Request_ID DESC'
+                            'LIMIT 1 OFFSET 0')
+    db.executescript('INSERT INTO Event'
+                     'VALUES (' + str(r_id) + ', ' + v_id + ', ' + e_id + ', "AWAITING APPROVAL", ' + content + ');')
+
 
 # === Главная страница ===
 @app.route("/")
