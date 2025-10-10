@@ -20,36 +20,36 @@ def get_db():
 
 def close_db(e=None):
     db = g.pop('db', None)
-
     if db is not None:
         db.close()
 
-def get_v_info():
+
+def get_v_password(login):
     db = get_db()
+    db.executescript('SELECT * FROM Volunteer_Autentification'
+                     'WHERE Volunteer_Username = "'+login + '";')
 
-    with current_app.open_resource('get_v_info.sql') as f:
-        db.executescript(f.read().decode('utf8'))
-
-
-def get_o_info():
-        db = get_db()
-
-        with current_app.open_resource('get_o_info.sql') as f:
-            db.executescript(f.read().decode('utf8'))
-
-
-def get_v_passwords():
+def get_o_password(login):
     db = get_db()
+    db.executescript(('SELECT * FROM Organization_Autentification'
+                     'WHERE Organization_Username = "'+login + '";'))
 
-    with current_app.open_resource('get_v_passwords.sql') as f:
-        db.executescript(f.read().decode('utf8'))
 
-
-def get_o_passwords():
+def create_event(req_ppl, date, desc, o_id, name):
+    """
+    Creates an event
+    :param req_ppl: How many ppl u need
+    :param date: date of event
+    :param desc: description
+    :return: nothin
+    """
     db = get_db()
+    e_id = db.executescript('SELECT Event_ID FROM Event'
+                              'ORDER BY Event_ID DESC'
+                              'LIMIT 1 OFFSET 0')
+    db.executescript('INSERT INTO Event'
+                     'VALUES ('+str(e_id)+', '+o_id+', '+req_ppl+', '+date+', '+desc+', '+name+');')
 
-    with current_app.open_resource('get_o_passwords.sql') as f:
-        db.executescript(f.read().decode('utf8'))
 
 
 # === Главная страница ===
