@@ -1,1 +1,0 @@
-SELECT * FROM Organiation_Accounts;
