@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Каталог мероприятий — Dobro.Letovo{% endblock %}
+
+{% block content %}
+    <section class="card">
+        <h1>Каталог мероприятий</h1>
+        <p>Здесь вы можете найти события по интересам и навыкам.</p>
+
+        <!-- Фильтры -->
+        <form method="get" class="filters">
+            <label for="search">Поиск:</label>
+            <input type="text" id="search" name="search" placeholder="Введите название события...">
+
+            <label for="category">Категория:</label>
+            <select id="category" name="category">
+                <option value="">Все</option>
+                <option value="эко">Эко-акции</option>
+                <option value="спорт">Спорт</option>
+                <option value="культура">Культура</option>
+                <option value="образование">Образование</option>
+            </select>
+
+            <button type="submit" class="btn btn-primary">Применить</button>
+        </form>
+    </section>
+
+    <!-- Список событий -->
+    <section>
+        <div class="card">
+            <h2>Помощь на школьной ярмарке</h2>
+            <p><strong>Дата:</strong> 20 сентября 2025</p>
+            <p><strong>Организатор:</strong> Школьный совет</p>
+            <a href="{{ url_for('event_detail', event_id=1) }}" class="btn btn-primary">Подробнее</a>
+        </div>
+
+        <div class="card">
+            <h2>Эко-субботник в парке</h2>
+            <p><strong>Дата:</strong> 25 сентября 2025</p>
+            <p><strong>Организатор:</strong> Экоклуб</p>
+            <a href="{{ url_for('event_detail', event_id=2) }}" class="btn btn-primary">Подробнее</a>
+        </div>
+
+        <div class="card">
+            <h2>Помощь в библиотеке</h2>
+            <p><strong>Дата:</strong> 28 сентября 2025</p>
+            <p><strong>Организатор:</strong> Библиотечный кружок</p>
+            <a href="{{ url_for('event_detail', event_id=3) }}" class="btn btn-primary">Подробнее</a>
+        </div>
+    </section>
+{% endblock %}
