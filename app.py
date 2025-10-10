@@ -1,223 +1,169 @@
-import os
-from flask import Flask, render_template, request, redirect, url_for, flash
-from models import db, Event, Comment, Request, Volunteer
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
-from flask_migrate import Migrate
+from flask import Flask, render_template, current_app, g
+import click
+import sqlite3
+import bcrypt
+from datetime import datetime
 
-UPLOAD_FOLDER = "static/uploads"
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 app = Flask(__name__)
 
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///dobro.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+#Команды работы с БД должны быть тут
 
-# обязательно для сессий и login_user
-app.secret_key = "super-secret-key-123"
-
-migrate = Migrate(app, db)
-# Привязываем db к app
-db.init_app(app)
-
-with app.app_context():
-    db.create_all()
-
-with app.app_context():
-    # создаём тестового волонтёра, если его ещё нет
-    test_volunteer = Volunteer.query.filter_by(email="test@volunteer.com").first()
-    if not test_volunteer:
-        test_volunteer = Volunteer(
-            name="Тестовый Волонтёр",
-            email="test@volunteer.com",
-            bio="Это тестовый аккаунт для входа",
-            password = "123",
-            secret_key = "123"
+def get_db():
+    if 'DobroLetovo.db' not in g:
+        g.db = sqlite3.connect(
+            current_app.config['DATABASE'],
+            detect_types=sqlite3.PARSE_DECLTYPES
         )
-        db.session.add(test_volunteer)
-        db.session.commit()
+        g.db.row_factory = sqlite3.Row
+
+    return g.db
 
 
-@app.route("/login_test", methods=["GET", "POST"])
-def login_test():
-    # Берём тестового волонтёра
-    volunteer = Volunteer.query.filter_by(email="test@volunteer.com").first()
-    if not volunteer:
-        flash("Тестовый аккаунт не найден!", "danger")
-        return redirect(url_for("index"))
+def close_db(e=None):
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
 
-    # логиним пользователя
-    login_user(volunteer)
-    flash(f"Вы вошли как {volunteer.name}", "success")
 
-    # перенаправляем на профиль
-    return redirect(url_for("profile", user_id=volunteer.id))
+def get_volunteer_password(login):
+    db = get_db()
+    db.executescript('SELECT * FROM Volunteer_Autentification'
+                     'WHERE Volunteer_Username = "'+login + '";')
 
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+def get_organization_password(login):
+    db = get_db()
+    db.executescript(('SELECT * FROM Organization_Autentification'
+                     'WHERE Organization_Username = "'+login + '";'))
 
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = "login"  # куда редиректить, если не авторизован
+
+def create_event_database(req_ppl, date, desc, o_id, name):
+    """
+    Creates an event
+    :param req_ppl: How many ppl u need
+    :param date: date of event
+    :param desc: description
+    :return: nothin
+    """
+    db = get_db()
+    e_id = db.executescript('SELECT Event_ID FROM Event'
+                              'ORDER BY Event_ID DESC'
+                              'LIMIT 1 OFFSET 0')
+    db.executescript('INSERT INTO Event'
+                     'VALUES ('+str(e_id)+', '+o_id+', '+req_ppl+', '+date+', '+desc+', '+name+');')
+def register_volunteer(username: str, password: str, name: str, description: str):
+    if session.query(Volunteer_Autentification).filter_by(Volunteer_Username=username).first():
+        print("Username already exists.")
+        return "Username already exists"
+
+    # Get max ID
+    last_id = session.query(func.max(Volunteer.Volunteer_ID)).scalar()
+    new_id = (last_id or 0) + 1  # If no volunteers yet, start from 1
+
+    # Create authentification entry
+    user_auth = Volunteer_Autentification(Volunteer_ID=new_id, Volunteer_Username=username)
+    user_auth.set_password(password)
+    session.add(user_auth)
+
+    # Create Volunteer profile
+    user_profile = Volunteer(
+        Volunteer_ID=new_id,
+        Volunteer_Name=name,
+        Volunteer_Description=description,
+        Volunteer_Rating=100,
+        Volunteer_Hours=0
+    )
+    session.add(user_profile)
+
+    session.commit()
+    print(f"User '{username}' registered successfully.")
+
+def register_organization(username: str, password: str, name: str, description: str):
+    if session.query(Organzation_Autentification).filter_by(username=username).first():
+        print("Username already exists.")
+        return "Username already exists"
+
+    #Get max ID
+    last_id = session.query(func.max(Organisation.Organization_ID)).scalar()
+    new_id = (last_id or 0) + 1  # If no volunteers yet, start from 1
+
+    #Create authentification entry
+    user_auth = Organzation_Autentification(Organization_ID = new_id, username=username)
+    user_auth.set_password(password)
+    session.add(user_auth)
+
+    #Create Volunteerprofile
+    user_profile = Volunteer(
+        Organization_ID = new_id,
+        Organization_Name = name,
+        Organization_Description = description
+    )
+    session.add(user_profile)
+
+    session.commit()
+    print(f"User '{username}' registered successfully.")
+
+def alter_request(request_id: int, new_status: str) -> None:
+    db = get_db()
+    (db.executescript
+    (f'''UPDATE Request"
+    "    SET Request_ID = {request_id}
+             Request_Status = {new_status}'''))
+
+def check_login_volunteer(email: str, password: str) -> bool:
+    db = get_db()
+
+    password_correct = db.executescript(f''' SELECT Volunteer_Password_Hash FROM Volunteer_Autentification
+                                             WHERE Volunteer_Email = {email}''')
+    if vounteer_id == '':
+        return False
+    return bcrypt.checkpw(password.encode('utf-8'), password_correct.encode('utf-8'))
 
 # === Главная страница ===
 @app.route("/")
 def index():
+
     return render_template("index.html")
 
-# --- Каталог мероприятий с фильтрами ---
+# === Каталог мероприятий ===
 @app.route("/events")
 def events():
-    category = request.args.get("category")
-    search = request.args.get("search")
+    # пока просто отдаём шаблон
+    return render_template("events.html")
 
-    query = Event.query
-
-    # Фильтр по категории
-    if category and category != "all":
-        query = query.filter(Event.category == category)
-
-    # Поиск по названию и описанию
-    if search:
-        query = query.filter(
-            (Event.title.ilike(f"%{search}%")) |
-            (Event.description.ilike(f"%{search}%"))
-        )
-
-    events = query.all()
-    categories = db.session.query(Event.category).distinct().all()
-
-    return render_template("events.html", events=events, categories=[c[0] for c in categories])
-
-# --- Детали события ---
+# === Карточка события ===
 @app.route("/events/<int:event_id>")
 def event_detail(event_id):
-    event = Event.query.get_or_404(event_id)
-    comments = Comment.query.filter_by(event_id=event_id).all()
-    return render_template("event_detail.html", event=event, comments=comments)
-
-
-# --- Присоединиться к событию ---
-@app.route("/events/<int:event_id>/join", methods=["POST"])
-def join_event(event_id):
-    # Заглушка: берём первого волонтёра (id=1), пока нет авторизации
-    volunteer = Volunteer.query.first()
-    if volunteer:
-        req = Request(volunteer_id=volunteer.id, event_id=event_id, status="pending")
-        db.session.add(req)
-        db.session.commit()
-        return redirect(url_for("event_detail", event_id=event_id))
-    return "Нет волонтёров для теста!"
-
-
-# --- Комментарии к событию ---
-@app.route("/events/<int:event_id>/comments", methods=["POST"])
-def event_comments(event_id):
-    author_id = request.form.get("volunteer_id")  # id волонтёра из формы
-    content = request.form.get("content")
-
-    if not content.strip():
-        return redirect(url_for("event_detail", event_id=event_id))
-
-    new_comment = Comment(content=content, volunteer_id=author_id, event_id=event_id)
-    db.session.add(new_comment)
-    db.session.commit()
-
-    return redirect(url_for("event_detail", event_id=event_id))
+    # пока просто заглушка
+    return render_template("event_detail.html", event_id=event_id)
 
 # === Профиль ===
-@app.route("/profile/<int:user_id>")
-@login_required
-def profile(user_id):
-    user = Volunteer.query.get_or_404(user_id)
-    return render_template("profile.html", user=user)
-
-@app.route("/profile/<int:user_id>/edit", methods=["GET", "POST"])
-def edit_profile(user_id):
-    user = Volunteer.query.get_or_404(user_id)
-
-    if request.method == "POST":
-        user.name = request.form["name"]
-        user.email = request.form["email"]
-        user.bio = request.form["bio"]
-
-        # загрузка аватара
-        if "avatar" in request.files:
-            file = request.files["avatar"]
-            if file and allowed_file(file.filename):
-                from werkzeug.utils import secure_filename
-                filename = secure_filename(file.filename)
-                filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-                file.save(filepath)
-                user.avatar = f"{UPLOAD_FOLDER}/{filename}"
-
-        db.session.commit()
-        flash("Профиль успешно обновлен!", "success")
-        return redirect(url_for("profile", user_id=user.id))
-
-    return render_template("edit_profile.html", user=user)
-
+@app.route("/profile")
+def profile():
+    return render_template("profile.html")
 
 # === Создание события ===
 @app.route("/create")
 def create_event():
     return render_template("create_event.html")
 
-@login_manager.user_loader
-def load_user(user_id):
-    return Volunteer.query.get(int(user_id))
-
 # === Авторизация ===
-@app.route("/login", methods=["GET", "POST"])
+@app.route("/login")
 def login():
+    db = get.db()
     if request.method == "POST":
-        email = request.form["email"]
-        user = Volunteer.query.filter_by(email=email).first()
-        if user:
-            login_user(user)  # авторизуем
-            flash("Вы успешно вошли!", "success")
-            return redirect(url_for("profile", user_id=user.id))
-        else:
-            flash("Пользователь не найден!", "danger")
+        email = request.form.get("email")
+        password = request.form.get("password")
+    if check_login_volunteer((email, password)):
+        print('Successful Login')
+    else:
+        print('Wrong email or password')
     return render_template("login.html")
 
-# === Выход из профиля ===
-@app.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    flash("Вы вышли из аккаунта.", "info")
-    return redirect(url_for("index"))
-
-# === Регистрация ===
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    if request.method == "POST":
-        name = request.form.get("name")
-        email = request.form.get("email")
-        bio = request.form.get("bio", "")
-
-        if not name or not email:
-            flash("Имя и email обязательны!", "danger")
-            return redirect(url_for("register"))
-
-        # Проверяем, есть ли уже пользователь с таким email
-        existing_user = Volunteer.query.filter_by(email=email).first()
-        if existing_user:
-            flash("Пользователь с таким email уже существует!", "danger")
-            return redirect(url_for("register"))
-
-        # создаём нового волонтёра
-        new_volunteer = Volunteer(name=name, email=email, bio=bio)
-        db.session.add(new_volunteer)
-        db.session.commit()
-
-        # автоматически логиним после регистрации
-        login_user(new_volunteer)
-        flash("Регистрация прошла успешно!", "success")
-        return redirect(url_for("profile", user_id=new_volunteer.id))
-
-    return render_template("register.html")
-
 # === Запуск приложения ===
+    create_event_database(100, '03.23.2025', 'We need people to dig holes', 1, 'Hole-digging')
+    create_event_database(52, '04.20.2052', 'Sort rubbish', 2, 'Rubbish-Sorting')
+    create_event_database(148, '14.02.1049', 'Robbing Serfs', 1, 'Tax Collection')
+
+
 if __name__ == "__main__":
     app.run(debug=True)
