@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Вход — Dobro.Letovo{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="auth-card">
+        <h1>Вход в систему</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <ul class="flashes">
+              {% for category, message in messages %}
+                <li class="flash {{ category }}">{{ message }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+
+        <form method="post" action="{{ url_for('login') }}">
+            <div class="form-group">
+                <label for="email">Электронная почта</label>
+                <input type="email" id="email" name="email" placeholder="example@mail.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <input type="password" id="password" name="password" placeholder="Введите пароль" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Войти</button>
+        </form>
+
+        <hr>
+
+        <h3>Нет аккаунта?</h3>
+        <p>Зарегистрируйтесь:</p>
+        <form method="post" action="{{ url_for('register') }}">
+            <div class="form-group">
+                <label for="reg_name">Имя</label>
+                <input type="text" id="reg_name" name="name" placeholder="Ваше имя" required>
+            </div>
+
+            <div class="form-group">
+                <label for="reg_email">Электронная почта</label>
+                <input type="email" id="reg_email" name="email" placeholder="example@mail.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="reg_password">Пароль</label>
+                <input type="password" id="reg_password" name="password" placeholder="Введите пароль" required>
+            </div>
+
+            <div class="form-group">
+                <label for="reg_bio">О себе</label>
+                <textarea id="reg_bio" name="bio" placeholder="Краткая информация о себе"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-secondary">Зарегистрироваться</button>
+        </form>
+    </div>
+</div>
+
+<style>
+/* Простейший CSS для красивого вида */
+.container {
+    max-width: 500px;
+    margin: 50px auto;
+    font-family: Arial, sans-serif;
+}
+
+.auth-card {
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    background-color: #fff;
+}
+
+.auth-card h1, .auth-card h3 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+button.btn {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button.btn-primary {
+    background-color: #007bff;
+    color: #fff;
+}
+
+button.btn-secondary {
+    background-color: #28a745;
+    color: #fff;
+}
+
+hr {
+    margin: 30px 0;
+    border: 0;
+    border-top: 1px solid #eee;
+}
+
+.flashes {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+.flashes li {
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.flashes li.flash.success { background-color: #d4edda; color: #155724; }
+.flashes li.flash.danger { background-color: #f8d7da; color: #721c24; }
+</style>
+{% endblock %}
