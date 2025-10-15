@@ -36,7 +36,7 @@ class Volunteer(db.Model, UserMixin):
         return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
 
 
-class Organisation(db.Model):
+class Organisation(db.Model, UserMixin):
     __tablename__ = 'Organisations'
     id = db.Column('Organisation_ID', db.Integer, primary_key=True)
     name = db.Column('Organisation_Name', db.String(50), nullable=False)
