@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Профиль организации — {{ organisation.name }}{% endblock %}
+{% block content %}
+
+<div class="profile-container">
+  <h1>{{ organisation.name }}</h1>
+  <p><strong>Email:</strong> {{ organisation.email }}</p>
+
+  {% if organisation.description %}
+    <p><strong>Описание:</strong> {{ organisation.description }}</p>
+  {% endif %}
+
+  <hr>
+  <a href="{{ url_for('create_event') }}" class="btn">Создать мероприятие</a>
+  <a href="{{ url_for('events') }}" class="btn btn-secondary">Посмотреть события</a>
+  <a href="{{ url_for('logout') }}" class="btn btn-light">Выйти</a>
+</div>
+
+<style>
+.profile-container {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 25px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  font-family: Arial, sans-serif;
+}
+.btn {
+  display: inline-block;
+  margin: 10px 10px 0 0;
+  padding: 10px 15px;
+  background-color: #28a745;
+  color: white;
+  border-radius: 5px;
+  text-decoration: none;
+}
+.btn:hover { background-color: #218838; }
+.btn-secondary { background-color: #007bff; }
+.btn-light { background-color: #6c757d; }
+</style>
+{% endblock %}

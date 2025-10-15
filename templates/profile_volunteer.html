@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Профиль волонтёра — {{ volunteer.name }}{% endblock %}
+{% block content %}
+
+<div class="profile-container">
+  <h1>{{ volunteer.name }}</h1>
+  <p><strong>Email:</strong> {{ volunteer.email }}</p>
+
+  {% if volunteer.bio %}
+    <p><strong>О себе:</strong> {{ volunteer.bio }}</p>
+  {% endif %}
+
+  <p><strong>Часы участия:</strong> {{ volunteer.hours or 0 }}</p>
+  <p><strong>Рейтинг:</strong> {{ volunteer.rating or 0 }}</p>
+
+  <hr>
+  <a href="{{ url_for('events') }}" class="btn">Посмотреть события</a>
+  <a href="{{ url_for('logout') }}" class="btn btn-secondary">Выйти</a>
+</div>
+
+<style>
+.profile-container {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 25px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  font-family: Arial, sans-serif;
+}
+.btn {
+  display: inline-block;
+  margin: 10px 10px 0 0;
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border-radius: 5px;
+  text-decoration: none;
+}
+.btn:hover { background-color: #0056b3; }
+.btn-secondary { background-color: #6c757d; }
+</style>
+{% endblock %}
