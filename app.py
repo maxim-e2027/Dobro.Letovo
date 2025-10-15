@@ -1,5 +1,5 @@
 import os
-from models import db, Event, Comment, Request, Volunteer, init_database_with_sqlite
+from models import db, Event, Comment, Request, Volunteer, Organisation, init_database_with_sqlite
 from flask_migrate import Migrate
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, login_required, logout_user
@@ -39,9 +39,11 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
-@login_manager.user_loader
 def load_user(user_id):
-    return Volunteer.query.get(int(user_id))
+    user = Volunteer.query.get(int(user_id))
+    if not user:
+        user = Organisation.query.get(int(user_id))
+    return user
 
 # ============================================
 # === ДОПОЛНИТЕЛЬНЫЕ ФУНКЦИИ ===
@@ -132,62 +134,121 @@ def edit_profile(user_id):
 @app.route("/create")
 def create_event():
     return render_template("create_event.html")
+# ===================================================
+# === LOGIN MANAGER (универсальный для двух ролей) ===
+# ===================================================
+@login_manager.user_loader
+def load_user(user_id):
+    # Попробуем сначала найти волонтёра, потом организацию
+    user = Volunteer.query.get(int(user_id))
+    if not user:
+        user = Organisation.query.get(int(user_id))
+    return user
 
 # ===================================================
-# === Регистрация ===
+# === РЕГИСТРАЦИЯ ВОЛОНТЁРА ===
 # ===================================================
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        name = request.form.get('name')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        bio = request.form.get('bio', '')
+@app.route("/register/volunteer", methods=["GET", "POST"])
+def register_volunteer():
+    if request.method == "POST":
+        name = request.form.get("name")
+        email = request.form.get("email")
+        password = request.form.get("password")
+        age = request.form.get("age")
+        skills = request.form.get("skills")
+        time = request.form.get("available_time")
 
         if not name or not email or not password:
             flash("Имя, email и пароль обязательны!", "danger")
-            return redirect(url_for('register'))
+            return redirect(url_for("register_volunteer"))
 
         if Volunteer.query.filter_by(email=email).first():
-            flash("Пользователь с таким email уже существует!", "danger")
-            return redirect(url_for('register'))
+            flash("Волонтёр с таким email уже существует!", "danger")
+            return redirect(url_for("register_volunteer"))
 
-        new_user = Volunteer(name=name, email=email, bio=bio)
-        new_user.set_password(password)
-        db.session.add(new_user)
+        new_vol = Volunteer(name=name, email=email, bio=f"Возраст: {age}, Навыки: {skills}, Время: {time}")
+        new_vol.set_password(password)
+        db.session.add(new_vol)
         db.session.commit()
 
-        login_user(new_user)
-        return redirect(url_for('profile', user_id=new_user.id))
+        login_user(new_vol)
+        flash("Регистрация волонтёра успешна!", "success")
+        # ✅ вот здесь исправлено
+        return redirect(url_for("volunteer_profile", volunteer_id=new_vol.id))
 
-    return render_template('login.html')
+    return render_template("register_volunteer.html")
 
 # ===================================================
-# === Логин ===
+# === РЕГИСТРАЦИЯ ОРГАНИЗАЦИИ ===
+# ===================================================
+@app.route("/register/organisation", methods=["GET", "POST"])
+def register_organisation():
+    if request.method == "POST":
+        org_name = request.form.get("org_name")
+        contact_email = request.form.get("email")
+        position = request.form.get("position")
+        password = request.form.get("password")
+        description = request.form.get("description")
+
+        if not org_name or not contact_email or not password:
+            flash("Название, email и пароль обязательны!", "danger")
+            return redirect(url_for("register_organisation"))
+
+        if Organisation.query.filter_by(email=contact_email).first():
+            flash("Организация с таким email уже существует!", "danger")
+            return redirect(url_for("register_organisation"))
+
+        new_org = Organisation(name=org_name, email=contact_email, description=description)
+        new_org.set_password(password)
+        db.session.add(new_org)
+        db.session.commit()
+
+        login_user(new_org)
+        flash("Организация успешно зарегистрирована!", "success")
+        return redirect(url_for("organisation_profile", organisation_id=new_org.id))
+
+    return render_template("register_organisation.html")
+
+# ===================================================
+# === УНИВЕРСАЛЬНЫЙ ЛОГИН (для волонтёров и организаций) ===
 # ===================================================
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
+        role = request.form.get('role')  # volunteer или organisation
         email = request.form.get('email')
         password = request.form.get('password')
 
-        user = Volunteer.query.filter_by(email=email).first()
+        user = None
+
+        if role == 'volunteer':
+            user = Volunteer.query.filter_by(email=email).first()
+        elif role == 'organisation':
+            user = Organisation.query.filter_by(email=email).first()
+
         if user and user.check_password(password):
             login_user(user)
             flash(f"Добро пожаловать, {user.name}!", "success")
-            return redirect(url_for('profile', user_id=user.id))
+            if role == 'volunteer':
+                return redirect(url_for('profile', user_id=user.id))
+            else:
+                return redirect(url_for('index'))
         else:
-            flash("Неверный email или пароль!", "danger")
-    return render_template('login.html')
+            flash("Неверный email, пароль или роль!", "danger")
 
-# ===================================================
-# === Профиль ===
-# ===================================================
-@app.route('/profile/<int:user_id>')
+    return render_template('login.html')
+@app.route("/profile/volunteer/<int:volunteer_id>")
 @login_required
-def profile(user_id):
-    user = Volunteer.query.get_or_404(user_id)
-    return render_template('profile.html', user=user)
+def volunteer_profile(volunteer_id):
+    volunteer = Volunteer.query.get_or_404(volunteer_id)
+    return render_template("profile_volunteer.html", volunteer=volunteer)
+
+
+@app.route("/profile/organisation/<int:organisation_id>")
+@login_required
+def organisation_profile(organisation_id):
+    organisation = Organisation.query.get_or_404(organisation_id)
+    return render_template("profile_organisation.html", organisation=organisation)
 
 # ===================================================
 # === Выход ===
