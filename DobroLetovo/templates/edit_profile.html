@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Редактировать профиль — Dobro.Letovo{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="profile-edit-card">
+        <h2>Редактировать профиль</h2>
+
+        <!-- Flash-сообщения -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <ul class="flashes">
+              {% for category, message in messages %}
+                <li class="flash {{ category }}">{{ message }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+
+        <form method="post" enctype="multipart/form-data">
+            <!-- Аватар -->
+            <div class="avatar-section">
+                {% if user.avatar %}
+                    <img src="{{ url_for('static', filename=user.avatar) }}" alt="avatar" class="avatar-preview">
+                {% else %}
+                    <div class="avatar-placeholder">{{ user.name[0] }}</div>
+                {% endif %}
+                <input type="file" name="avatar" class="file-input">
+            </div>
+
+            <!-- Основные поля -->
+            <div class="form-group">
+                <label>Имя</label>
+                <input type="text" name="name" value="{{ user.name }}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="email" value="{{ user.email }}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Описание</label>
+                <textarea name="bio" rows="4" placeholder="Расскажите о себе">{{ user.bio }}</textarea>
+            </div>
+
+            <!-- Кнопки -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+                <a href="{{ url_for('profile', user_id=user.id) }}" class="btn btn-outline">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+/* ===== Общий контейнер ===== */
+.container {
+    max-width: 600px;
+    margin: 50px auto;
+    font-family: 'Arial', sans-serif;
+}
+
+/* ===== Карточка редактирования ===== */
+.profile-edit-card {
+    background-color: #fff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+/* ===== Заголовок ===== */
+.profile-edit-card h2 {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+/* ===== Flash-сообщения ===== */
+.flashes {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 20px;
+}
+.flashes li {
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+.flashes li.flash.success { background-color: #d4edda; color: #155724; }
+.flashes li.flash.danger { background-color: #f8d7da; color: #721c24; }
+
+/* ===== Форма ===== */
+.form-group {
+    margin-bottom: 20px;
+}
+.form-group label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 6px;
+}
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+/* ===== Аватар ===== */
+.avatar-section {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.avatar-preview, .avatar-placeholder {
+    display: inline-block;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+    background-color: #eee;
+    text-align: center;
+    line-height: 120px;
+    font-size: 48px;
+    color: #666;
+}
+.file-input {
+    display: block;
+    margin: 0 auto;
+    font-size: 14px;
+}
+
+/* ===== Кнопки ===== */
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 25px;
+}
+.btn {
+    padding: 12px 24px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: none;
+    text-align: center;
+}
+.btn-primary {
+    background-color: #007bff;
+    color: #fff;
+}
+.btn-outline {
+    background-color: transparent;
+    border: 2px solid #007bff;
+    color: #007bff;
+}
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+.btn-outline:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+</style>
+{% endblock %}

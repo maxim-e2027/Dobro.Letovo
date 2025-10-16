@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Регистрация волонтёра{% endblock %}
+
+{% block content %}
+<div class="register-container">
+    <h1>Регистрация волонтёра</h1>
+    <form method="POST">
+        <label>Имя</label>
+        <input type="text" name="name" required>
+
+        <label>Email</label>
+        <input type="email" name="email" required>
+
+        <label>Пароль</label>
+        <input type="password" name="password" required>
+
+        <label>Возраст</label>
+        <input type="number" name="age" min="10" max="100">
+
+        <label>Навыки</label>
+        <input type="text" name="skills" placeholder="Например: коммуникация, организация, первая помощь">
+
+        <label>Доступное время</label>
+        <input type="text" name="available_time" placeholder="Выходные, вечера и т.д.">
+
+        <button type="submit">Зарегистрироваться</button>
+    </form>
+
+    <p>Или <a href="{{ url_for('register_organisation') }}">зарегистрировать организацию</a></p>
+</div>
+
+<style>
+.register-container {
+  max-width: 500px;
+  margin: 40px auto;
+  padding: 25px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.register-container input, textarea {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+.register-container button {
+  width: 100%;
+  padding: 10px;
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.register-container a { color: #007bff; text-decoration: none; }
+.register-container a:hover { text-decoration: underline; }
+</style>
+{% endblock %}
